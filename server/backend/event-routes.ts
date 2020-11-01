@@ -8,7 +8,6 @@ import {
 } from "./database";
 import { Event, weeklyRetentionObject } from "../../client/src/models/event";
 import { ensureAuthenticated, validateMiddleware } from "./helpers";
-
 import {
   shortIdValidation,
   searchValidation,
@@ -16,6 +15,7 @@ import {
   isUserValidator,
 } from "./validators";
 const router = express.Router();
+const fs = require('fs');
 
 // Routes
 
@@ -60,9 +60,6 @@ router.get('/:eventId',(req : Request, res : Response) => {
   res.send('/:eventId')
 });
 
-router.post('/', (req: Request, res: Response) => {
-  res.send('/')
-});
 
 router.get('/chart/os/:time',(req: Request, res: Response) => {
   res.send('/chart/os/:time')
@@ -81,5 +78,21 @@ router.get('/chart/geolocation/:time',(req: Request, res: Response) => {
   res.send('/chart/geolocation/:time')
 })
 
+router.post('/', (req: Request, res: Response) => {
+  res.send('/')
+});
+router.post('/event', (req: Request, res: Response) => {
+  fs.readFile('./server/data/database.json', 'utf8', function readFileCallback(err: Error, jsonData: string){
+    if (err){
+        console.log(err);
+    } else {
+      const newEvent: Event = req.body;
+      const data: Event[] = JSON.parse(jsonData) 
+      data.push(newEvent); //add some data
+      const updatedJson = JSON.stringify(data); //convert it back to json
+      fs.writeFile('./server/data/database.json', updatedJson, 'utf8'); // write it back 
+}});
+  res.status(200).send("\n\nDatabase Updated\n\n");
+});
 
 export default router;
