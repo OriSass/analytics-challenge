@@ -20,5 +20,6 @@
   "homepage": "https://github.com/suvelocity/analytics-challenge-boilerplate#readme",
   "dependencies": {
     "@react-google-maps/api": "^1.13.0"
-  }
+  },
+  
 }

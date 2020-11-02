@@ -93,8 +93,9 @@
     "prestart": "npm run db:seed:dev",
     "start": "npm run start:api",
     "start:api": "npm run tsnode --files ./backend",
+    "start:watch": "nodemon",
     "db:seed": "npm run tsnode scripts/generateSeedData",
-    "tsnode": "nyc --silent ts-node -P ./tsconfig.tsnode.json",
+    "tsnode": "start:watch nyc --silent ts-node -P ./tsconfig.tsnode.json",
     "postdb:seed": "npm run db:seed:dev",
     "db:seed:dev": "ncp ./data/database-seed.json ./data/database.json",
     "dev": "cd .. && cd client && npm run dev",
@@ -128,6 +129,19 @@
     "codesandbox:start:api": "yarn tsnode:not-instrumented --files backend/app.ts",
     "codesandbox:start": "NODE_ENV=development TSC_COMPILE_ON_ERROR=true concurrently \"react-scripts start\" yarn:start:api:codesandbox"
   },
+  "nodemonConfig": {
+    "ignore": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    ".git",
+    "node_modules"
+    ],
+    "watch": [
+    "src"
+    ],
+    "exec": "npm start",
+    "ext": "ts"
+    },
   "eslintConfig": {
     "env": {
       "cypress/globals": true
