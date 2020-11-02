@@ -95,7 +95,7 @@
     "start:api": "npm run tsnode --files ./backend",
     "start:watch": "nodemon",
     "db:seed": "npm run tsnode scripts/generateSeedData",
-    "tsnode": "start:watch nyc --silent ts-node -P ./tsconfig.tsnode.json",
+    "tsnode": "nyc --silent ts-node -P ./tsconfig.tsnode.json",
     "postdb:seed": "npm run db:seed:dev",
     "db:seed:dev": "ncp ./data/database-seed.json ./data/database.json",
     "dev": "cd .. && cd client && npm run dev",

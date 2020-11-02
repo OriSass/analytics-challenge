@@ -33,7 +33,7 @@ interface Database{
 router.get('/all', (req: Request, res: Response) => {
   try {
     const data = fs.readFileSync('./data/database.json');
-    const { events } = JSON.parse(data);
+    const { events } = JSON.parse(data);    
     res.json(events);
   } catch (error) {
     res.status(404).send(`\nWhoops! Didn't find any data!\n`)
@@ -41,6 +41,8 @@ router.get('/all', (req: Request, res: Response) => {
 });
 
 router.get('/all-filtered', (req: Request, res: Response) => {
+  const filters: Filter = req.query;
+
   res.send('/all-filtered')
 });
 
@@ -89,18 +91,16 @@ router.get('/chart/geolocation/:time',(req: Request, res: Response) => {
 router.post('/', (req: Request, res: Response) => {
   res.send('/')
 });
-// NOT WORKING
+
 router.post('/event', (req: Request, res: Response) => {
   const data = fs.readFileSync('./data/database.json');
   const { events } = JSON.parse(data);
   const newEvent: Event = req.body;
-  //console.log(newEvent);
   events.push(newEvent);
   const newData:Database = {
     events: events
   };
   const updatedJson = JSON.stringify(newData);
-  //console.log(updatedJson);
   
   fs.writeFile('./data/database.json', updatedJson, (err:Error) => {
     if(err){
