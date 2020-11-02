@@ -82,10 +82,11 @@ router.post('/', (req: Request, res: Response) => {
   res.send('/')
 });
 router.post('/event', (req: Request, res: Response) => {
-  fs.readFile('./server/data/database.json', 'utf8', function readFileCallback(err: Error, jsonData: string){
+  fs.readFile('../data/database.json', 'utf8', function readFileCallback(err: Error, jsonData: string){
     if (err){
         console.log(err);
     } else {
+      console.log(`jsonData is ${jsonData}`);
       const newEvent: Event = req.body;
       const data: Event[] = JSON.parse(jsonData) 
       data.push(newEvent); //add some data
