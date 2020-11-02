@@ -6,8 +6,8 @@ import { Request, Response } from "express";
 // some useful database functions in here:
 import {
 } from "./database";
-import { os, GeoLocation, browser, Event, eventName, weeklyRetentionObject, DayAndSessionCount, Database, Filter, FilteredEvents } from "../../client/src/models/event";
-import { ensureAuthenticated, validateMiddleware, getAllEvents, sortByDate, getAllEventsWithNormalDates, getEventsDitsinctByDay, updateDb, filterEvents } from "./helpers";
+import { os, GeoLocation, browser, Event, eventName, weeklyRetentionObject, DayAndSessionCount, Database, Filter, FilteredEvents, HourAndSessionCount } from "../../client/src/models/event";
+import { ensureAuthenticated, validateMiddleware, getAllEvents, sortByDate, getAllEventsWithNormalDates, getAllEventsWithNormalDateTime, getEventsDitsinctByDay, updateDb, filterEvents, getEventsDitsinctByHour, getSessionsByDays, getAllSessionFromDate } from "./helpers";
 import {
   shortIdValidation,
   searchValidation,
@@ -41,19 +41,24 @@ router.get('/all-filtered', (req: Request, res: Response) => {
 
 router.get('/by-days/:offset', (req: Request, res: Response) => {
   try {
-    let events: Event[] = getAllEvents();
-    sortByDate(events, '+');
-    events = getAllEventsWithNormalDates(events);
-    const sessionByDay: DayAndSessionCount[] = getEventsDitsinctByDay(events);  
-    const offset:number = parseInt(req.params.offset);
-    res.json(sessionByDay.slice(sessionByDay.length - offset - 7, sessionByDay.length - offset));
+    const sessionsByDay = getSessionsByDays();
+    const offSet = parseInt(req.params.offset);
+    const startIndex:number = sessionsByDay.length - offSet - 7;
+    const endIndex:number = sessionsByDay.length - offSet;
+    res.json(sessionsByDay.slice(startIndex, endIndex));
+    //res.json(sessionsByDay);
   } catch (error) {
     res.status(404).send(`Couldn't get the data :(`)
   }
 });
 
 router.get('/by-hours/:offset', (req: Request, res: Response) => {
-  res.send('/by-hours/:offset')
+    const sessionsByDay = getSessionsByDays();
+    const offset:number = parseInt(req.params.offset);
+    const filterDate = sessionsByDay[sessionsByDay.length - 1 - offset].date;
+    const sessionsOfDate = getAllSessionFromDate(filterDate);
+    console.log(`Sessions on ${filterDate}: ${sessionsOfDate.length}`);
+    res.json(getEventsDitsinctByHour(sessionsOfDate));
 });
 
 router.get('/today', (req: Request, res: Response) => {

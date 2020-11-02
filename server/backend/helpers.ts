@@ -9,6 +9,7 @@ import {
   eventName,
   weeklyRetentionObject,
   DayAndSessionCount,
+  HourAndSessionCount,
   Database,
   Filter,
   FilteredEvents,
@@ -79,6 +80,23 @@ export const getAllEventsWithNormalDates = (events: Event[]): Event[] => {
   });
   return events;
 };
+// returns an event array with hours in "hh:mm" instead of milliseconds
+export const getAllEventsWithNormalDateTime = (events: Event[]): Event[] => {
+  events.forEach((e: Event) => {
+    const dateObj = new Date(e.date);
+    const dateAndHour: string = dateObj.toLocaleString("en-US", { timeZoneName: "short" }); // FORMAT: MM/DD/YYYY, 10:30:15 AM CST
+    const wierdDate: string = dateAndHour.split(",")[0];
+    const day = wierdDate.split("/")[1];
+    const month = wierdDate.split("/")[0];
+    const year = wierdDate.split("/")[2];
+
+    const weirdTime: string = dateAndHour.split(",")[1].slice(1,8);
+    const hour = weirdTime.split(":")[0];
+    e.date = `${day}/${month}/${year},${hour}:00`;
+  });
+  return events;
+};
+
 // return an array of dates and the number of sessions in each day
 export const getEventsDitsinctByDay = (events: Event[]): DayAndSessionCount[] => {
   const eByDays: DayAndSessionCount[] = [];
@@ -102,6 +120,34 @@ export const getEventsDitsinctByDay = (events: Event[]): DayAndSessionCount[] =>
     }
   });
   return eByDays;
+};
+// return an array of hours and the number of sessions in each day
+export const getEventsDitsinctByHour = (events: Event[]): HourAndSessionCount[] => {
+  const eByHours: HourAndSessionCount[] = [];
+  events.forEach((e: Event) => {
+    if(typeof e.date === "string"){
+      const hour = e.date.split(',')[1];
+      if (eByHours.length > 0) {
+          let index: number = 0;
+          const exists = eByHours.some((element: HourAndSessionCount, i: number) => {
+              if (element.hour === hour) {
+                index = i;
+                return true;
+              }
+            
+            return false;
+          });
+          if (exists) {
+            eByHours[index].count++;
+          } else {
+            eByHours.push({ hour, count: 1 });
+          }
+      } else {
+        eByHours.push({ hour, count: 1 });
+      }
+   }
+  });
+  return eByHours;
 };
 
 // sorts the event arr from latest backwards for + and the oppisite for -
@@ -171,3 +217,28 @@ export const filterEvents = (events: Event[], filters: Filter): FilteredEvents =
   const obj = { events, more };
   return obj;
 };
+
+// gets an array of event with full date and time: dd/mm/yy hh:mm 
+// returns only the events from a specific date
+export const getAllSessionFromDate = (filterDate: string): Event[] => {
+  let events: Event[] = getAllEvents();
+  sortByDate(events, '+');
+  events = getAllEventsWithNormalDateTime(events);
+  events = events.filter((e: Event) => {
+    if(typeof e.date === "string"){
+      return e.date.split(',')[0] === filterDate;
+    }
+    else{
+      return false;
+    } 
+  });
+  return events;
+}
+
+export const getSessionsByDays = (): DayAndSessionCount[] => {
+  let events: Event[] = getAllEvents();
+  sortByDate(events, '+');
+  events = getAllEventsWithNormalDates(events);
+  const sessionByDay: DayAndSessionCount[] = getEventsDitsinctByDay(events);
+  return sessionByDay;
+}

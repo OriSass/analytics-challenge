@@ -4,7 +4,7 @@ export interface Event {
   name: eventName;
   url: string;
   distinct_user_id: string;
-  date: number | string;
+  date: number | string; //number for ms and string for dd/mm/yyyy hh:mm
   os: os;
   browser: browser;
   geolocation: GeoLocation;
@@ -49,6 +49,10 @@ export interface Database{
 }
 export interface DayAndSessionCount{
   date:string, 
+  count: number
+}
+export interface HourAndSessionCount{
+  hour:string, 
   count: number
 }
 
