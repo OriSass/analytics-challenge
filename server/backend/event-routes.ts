@@ -26,10 +26,18 @@ interface Filter {
   search: string;
   offset: number;
 }
+interface Database{
+  events: Event[];
+}
 
 router.get('/all', (req: Request, res: Response) => {
-  res.send('/all')
-    
+  try {
+    const data = fs.readFileSync('./data/database.json');
+    const { events } = JSON.parse(data);
+    res.json(events);
+  } catch (error) {
+    res.status(404).send(`\nWhoops! Didn't find any data!\n`)
+  }    
 });
 
 router.get('/all-filtered', (req: Request, res: Response) => {
@@ -81,19 +89,36 @@ router.get('/chart/geolocation/:time',(req: Request, res: Response) => {
 router.post('/', (req: Request, res: Response) => {
   res.send('/')
 });
+// NOT WORKING
 router.post('/event', (req: Request, res: Response) => {
-  fs.readFile('../data/database.json', 'utf8', function readFileCallback(err: Error, jsonData: string){
-    if (err){
-        console.log(err);
-    } else {
-      console.log(`jsonData is ${jsonData}`);
-      const newEvent: Event = req.body;
-      const data: Event[] = JSON.parse(jsonData) 
-      data.push(newEvent); //add some data
-      const updatedJson = JSON.stringify(data); //convert it back to json
-      fs.writeFile('./server/data/database.json', updatedJson, 'utf8'); // write it back 
-}});
-  res.status(200).send("\n\nDatabase Updated\n\n");
+  const data = fs.readFileSync('./data/database.json');
+  const { events } = JSON.parse(data);
+  const newEvent: Event = req.body;
+  //console.log(newEvent);
+  events.push(newEvent);
+  const newData:Database = {
+    events: events
+  };
+  const updatedJson = JSON.stringify(newData);
+  //console.log(updatedJson);
+  
+  fs.writeFile('./data/database.json', updatedJson, (err:Error) => {
+    if(err){
+      console.log(err.message)
+    }});
+  res.status(200).send('Database up to date!');
+//   fs.readFile('./data/database.json', 'utf8', function readFileCallback(err: Error, jsonData: string){
+//     if (err){
+//         console.log(err);
+//     } else {
+//       const newEvent: Event = req.body;
+//       console.log(`\nnewEvent is ${newEvent}\n`);
+//       const { events } = JSON.parse(jsonData) 
+//       events.push(newEvent); //add some data
+//       const updatedJson = JSON.stringify(events); //convert it back to json
+//       fs.writeFile('./server/data/database.json', updatedJson, 'utf8'); // write it back 
+// }});
+//   res.status(200).send("\n\nDatabase Updated\n\n");
 });
 
 export default router;
