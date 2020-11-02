@@ -30,11 +30,22 @@ interface Database{
   events: Event[];
 }
 
+const getAllEvents = (): Event[] => {
+  const data = fs.readFileSync('./data/database.json');
+  const { events } = JSON.parse(data);
+  return events;
+}
+const updateDb = (updatedData: Database): void => {
+  const updatedJson = JSON.stringify(updatedData);
+  fs.writeFile('./data/database.json', updatedJson, (err:Error) => {
+    if(err){
+      console.log(err.message)
+    }});
+}
+
 router.get('/all', (req: Request, res: Response) => {
-  try {
-    const data = fs.readFileSync('./data/database.json');
-    const { events } = JSON.parse(data);    
-    res.json(events);
+  try {    
+    res.json(getAllEvents());
   } catch (error) {
     res.status(404).send(`\nWhoops! Didn't find any data!\n`)
   }    
@@ -93,32 +104,14 @@ router.post('/', (req: Request, res: Response) => {
 });
 
 router.post('/event', (req: Request, res: Response) => {
-  const data = fs.readFileSync('./data/database.json');
-  const { events } = JSON.parse(data);
+  const events = getAllEvents();
   const newEvent: Event = req.body;
   events.push(newEvent);
   const newData:Database = {
     events: events
   };
-  const updatedJson = JSON.stringify(newData);
-  
-  fs.writeFile('./data/database.json', updatedJson, (err:Error) => {
-    if(err){
-      console.log(err.message)
-    }});
+  updateDb(newData);
   res.status(200).send('Database up to date!');
-//   fs.readFile('./data/database.json', 'utf8', function readFileCallback(err: Error, jsonData: string){
-//     if (err){
-//         console.log(err);
-//     } else {
-//       const newEvent: Event = req.body;
-//       console.log(`\nnewEvent is ${newEvent}\n`);
-//       const { events } = JSON.parse(jsonData) 
-//       events.push(newEvent); //add some data
-//       const updatedJson = JSON.stringify(events); //convert it back to json
-//       fs.writeFile('./server/data/database.json', updatedJson, 'utf8'); // write it back 
-// }});
-//   res.status(200).send("\n\nDatabase Updated\n\n");
 });
 
 export default router;
