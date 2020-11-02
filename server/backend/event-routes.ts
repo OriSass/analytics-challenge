@@ -6,43 +6,19 @@ import { Request, Response } from "express";
 // some useful database functions in here:
 import {
 } from "./database";
-import { Event, weeklyRetentionObject } from "../../client/src/models/event";
-import { ensureAuthenticated, validateMiddleware } from "./helpers";
+import { os, GeoLocation, browser, Event, eventName, weeklyRetentionObject, DayAndSessionCount, Database, Filter, FilteredEvents } from "../../client/src/models/event";
+import { ensureAuthenticated, validateMiddleware, getAllEvents, sortByDate, getAllEventsWithNormalDates, getEventsDitsinctByDay, updateDb, filterEvents } from "./helpers";
 import {
   shortIdValidation,
   searchValidation,
   userFieldsValidator,
   isUserValidator,
 } from "./validators";
+import { values } from "lodash";
 const router = express.Router();
 const fs = require('fs');
 
 // Routes
-
-interface Filter {
-  sorting: string;
-  type: string;
-  browser: string;
-  search: string;
-  offset: number;
-}
-interface Database{
-  events: Event[];
-}
-
-const getAllEvents = (): Event[] => {
-  const data = fs.readFileSync('./data/database.json');
-  const { events } = JSON.parse(data);
-  return events;
-}
-const updateDb = (updatedData: Database): void => {
-  const updatedJson = JSON.stringify(updatedData);
-  fs.writeFile('./data/database.json', updatedJson, (err:Error) => {
-    if(err){
-      console.log(err.message)
-    }});
-}
-
 router.get('/all', (req: Request, res: Response) => {
   try {    
     res.json(getAllEvents());
@@ -52,13 +28,28 @@ router.get('/all', (req: Request, res: Response) => {
 });
 
 router.get('/all-filtered', (req: Request, res: Response) => {
-  const filters: Filter = req.query;
-
-  res.send('/all-filtered')
+  try{
+    let events: Event[] = getAllEvents(); 
+    const filters: Filter = req.query;
+    const filtered = filterEvents(events, filters);
+    res.json(filtered);
+  }
+  catch(err){
+    res.status(404).send(`We Couldn't filter the data :(`)
+  }
 });
 
 router.get('/by-days/:offset', (req: Request, res: Response) => {
-  res.send('/by-days/:offset')
+  try {
+    let events: Event[] = getAllEvents();
+    sortByDate(events, '+');
+    events = getAllEventsWithNormalDates(events);
+    const sessionByDay: DayAndSessionCount[] = getEventsDitsinctByDay(events);  
+    const offset:number = parseInt(req.params.offset);
+    res.json(sessionByDay.slice(sessionByDay.length - offset - 7, sessionByDay.length - offset));
+  } catch (error) {
+    res.status(404).send(`Couldn't get the data :(`)
+  }
 });
 
 router.get('/by-hours/:offset', (req: Request, res: Response) => {
@@ -99,11 +90,8 @@ router.get('/chart/geolocation/:time',(req: Request, res: Response) => {
   res.send('/chart/geolocation/:time')
 })
 
-router.post('/', (req: Request, res: Response) => {
-  res.send('/')
-});
 
-router.post('/event', (req: Request, res: Response) => {
+router.post('/', (req: Request, res: Response) => {
   const events = getAllEvents();
   const newEvent: Event = req.body;
   events.push(newEvent);

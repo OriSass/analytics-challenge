@@ -4,7 +4,7 @@ export interface Event {
   name: eventName;
   url: string;
   distinct_user_id: string;
-  date: number;
+  date: number | string;
   os: os;
   browser: browser;
   geolocation: GeoLocation;
@@ -36,3 +36,25 @@ export interface RetentionCohort {
   search: string;
   offset: number;
 }
+
+export interface Filter {
+  sorting: string;
+  type: eventName;
+  browser: browser;
+  search: string;
+  offset: number;
+}
+export interface Database{
+  events: Event[];
+}
+export interface DayAndSessionCount{
+  date:string, 
+  count: number
+}
+
+export interface FilteredEvents{
+  events: Event[],
+  more: boolean
+}
+
+export type value = string | number | eventName | os | GeoLocation | browser;
