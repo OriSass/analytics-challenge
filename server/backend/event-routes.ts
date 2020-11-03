@@ -7,7 +7,7 @@ import { Request, Response } from "express";
 import {
 } from "./database";
 import { os, GeoLocation, browser, Event, eventName, weeklyRetentionObject, DayAndSessionCount, Database, Filter, FilteredEvents, HourAndSessionCount } from "../../client/src/models/event";
-import { ensureAuthenticated, validateMiddleware, getAllEvents, sortByDate, getAllEventsWithNormalDates, getAllEventsWithNormalDateTime, getEventsDitsinctByDay, updateDb, filterEvents, getEventsDitsinctByHour, getSessionsByDays, getAllSessionFromDate } from "./helpers";
+import { ensureAuthenticated, validateMiddleware, getAllEvents, getEndDate, getRetentionCohort, sortByDate, getAllEventsWithNormalDates, getAllEventsWithNormalDateTime, getEventsDitsinctByDay, updateDb, filterEvents, getEventsDitsinctByHour, getSessionsByDays, getAllSessionFromDate } from "./helpers";
 import {
   shortIdValidation,
   searchValidation,
@@ -56,8 +56,8 @@ router.get('/by-hours/:offset', (req: Request, res: Response) => {
     const sessionsByDay = getSessionsByDays();
     const offset:number = parseInt(req.params.offset);
     const filterDate = sessionsByDay[sessionsByDay.length - 1 - offset].date;
+    console.log(filterDate);
     const sessionsOfDate = getAllSessionFromDate(filterDate);
-    console.log(`Sessions on ${filterDate}: ${sessionsOfDate.length}`);
     res.json(getEventsDitsinctByHour(sessionsOfDate));
 });
 
@@ -71,7 +71,8 @@ router.get('/week', (req: Request, res: Response) => {
 
 router.get('/retention', (req: Request, res: Response) => {
   const {dayZero} = req.query
-  res.send('/retention')
+  const retention: weeklyRetentionObject[] = getRetentionCohort(dayZero);
+  res.send('retention');
 });
 router.get('/:eventId',(req : Request, res : Response) => {
   res.send('/:eventId')

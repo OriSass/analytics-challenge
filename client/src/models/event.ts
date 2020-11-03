@@ -49,7 +49,9 @@ export interface Database{
 }
 export interface DayAndSessionCount{
   date:string, 
-  count: number
+  signUpCount:number,
+  loginCount:number,
+  count: number // = signUpCount + loginCount
 }
 export interface HourAndSessionCount{
   hour:string, 
@@ -59,6 +61,12 @@ export interface HourAndSessionCount{
 export interface FilteredEvents{
   events: Event[],
   more: boolean
+}
+
+export interface DaySummary{
+  date: string,
+  signUpCount:number,
+  loginCount:number
 }
 
 export type value = string | number | eventName | os | GeoLocation | browser;

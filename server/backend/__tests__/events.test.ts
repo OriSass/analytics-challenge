@@ -66,6 +66,8 @@ describe("main test", () => {
     const { body: sessionsByHours } = await request(app).get("/events/by-hours/0").expect(200)
 
     expect(sessionsByHours.length).toBe(24)
+    console.log(sessionsByHours);
+    
     expect(sessionsByHours.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(7)
 
     const { body: sessionsByHours2 } = await request(app).get("/events/by-hours/2").expect(200)
