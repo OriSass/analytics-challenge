@@ -70,9 +70,9 @@ router.get('/week', (req: Request, res: Response) => {
 });
 
 router.get('/retention', (req: Request, res: Response) => {
-  const {dayZero} = req.query
+  const dayZero:number = parseInt(req.query.dayZero);
   const retention: weeklyRetentionObject[] = getRetentionCohort(dayZero);
-  res.send('retention');
+  res.send(retention);
 });
 router.get('/:eventId',(req : Request, res : Response) => {
   res.send('/:eventId')

@@ -16,6 +16,7 @@ import {
   DaySummary
 } from "../../client/src/models/event";
 import { log } from "console";
+import { OneDay, OneWeek } from "./timeFrames";
 const fs = require("fs");
 
 export const ensureAuthenticated = (req: Request, res: Response, next: NextFunction) => {
@@ -72,9 +73,9 @@ export const updateDb = (updatedData: Database): void => {
 // returns an event array with dates in dd/mm/yy instead of milliseconds
 export const getAllEventsWithNormalDates = (events: Event[]): Event[] => {
   events.forEach((e: Event, i:number) => {
-    if(i === events.length - 1){
-      console.log(e.date);
-    }
+    // if(i === events.length - 1){
+    //   console.log(e.date);
+    // }
     e.date = msToDate(e.date as number);
   });
   return events;
@@ -88,7 +89,7 @@ export const msToDate = (ms: number): string => {
   const month = wierdDate.split("/")[0];
   const year = wierdDate.split("/")[2];
   const normalDate = `${day}/${month}/${year}`;
-  console.log(`ms to normal date: ${normalDate}`);
+  //console.log(`ms to normal date: ${normalDate}`);
   return normalDate;
 }
 // returns an event array with hours in "hh:mm" instead of milliseconds
@@ -161,7 +162,11 @@ export const getEventsDitsinctByHour = (events: Event[]): HourAndSessionCount[] 
   }
   events.forEach((e: Event) => {
     if(typeof e.date === "string"){
-      const hour = e.date.split(',')[1];
+      let hour = e.date.split(',')[1];
+      if(hour.split(':')[0].length === 1){
+        hour = '0' + hour;
+      }
+      console.log(hour);
       for (let i = 0; i < eByHours.length; i++) {
         if(eByHours[i].hour === hour){
           eByHours[i].count++;
@@ -275,27 +280,30 @@ export const getSessionsByDays = (): DayAndSessionCount[] => {
 
 export const getRetentionCohort = (dayZero:number) : weeklyRetentionObject[] => {
   let retention:weeklyRetentionObject[] = []; 
-  // need to know how many logins and signUps each day= summarizeByDay()
   const sessions: DayAndSessionCount[] = getSessionsByDays();
-  let startDate:string = msToDate(dayZero);
-  let endDate:string = getEndDate(startDate);
-  console.log(`INITIAL START: ${startDate}, END ${endDate}`);
+  let startDate:number = dayZero;
+  let endDate:number = startDate + OneWeek; 
+  let now:number = Date.now();
   let index:number = 0;
-  let whole:number = getSignUpOrLogInCount(sessions, startDate, endDate, "signUpCount");
-  while(endDate.split('/')[0] !== "30"){
+  //let whole:number = getSignUpOrLogInCount(sessions, startDate, endDate, "signUpCount");
+  while(startDate <= now){
     let rObj: weeklyRetentionObject = {
       registrationWeek: index, 
-      newUsers: whole, 
-      weeklyRetention: getWeeklyRetention(sessions, startDate, endDate, whole), // helper function getWeeklyRetention: number[]
-      start: startDate,
-      end: endDate
+      newUsers: 5, 
+      //weeklyRetention: getWeeklyRetention(sessions, startDate, endDate, whole), // helper function getWeeklyRetention: number[]
+      weeklyRetention: [],
+      start: msToDate(startDate),
+      end: msToDate(endDate)
     } 
     retention.push(rObj);
-    startDate = endDate;
-    endDate = getEndDate(startDate);
+    console.log('pushed');
+    startDate = endDate + OneDay;
+    endDate = startDate + OneWeek;
+    index++;
   }
+  //const weekStart = new Date (new Date(dayZero + (i * OneWeek)).setHours(0,0,0,0)).getTime();
+
   console.log("OUT OF THE OUTER LOOP");
-  
   // need to know how many signed up that week= getSignUpCount(start: string, end: string): number
   return retention;
 }
@@ -316,9 +324,7 @@ export const getSignUpOrLogInCount = (daysAndSessions: DayAndSessionCount[], sta
 // recives a start date and returns the end date, handling the half week scenarios
 export const getEndDate = (startDate: string): string => {//  24/10/2020
   const startDay:number = parseInt(startDate.split('/')[0]); //24
-  
   console.log(`start day is: ${startDay}`);
-  
   const startMonth:string = startDate.split('/')[1] //10
   const startYear:string = startDate.split('/')[2] //2020
   //const endDay:number = ((30 - startDay) < 7) ? 30: startDay + 7; 
@@ -334,16 +340,57 @@ export const getWeeklyRetention = (sessions: DayAndSessionCount[], startDate: st
   endDate = getEndDate(startDate);
   console.log(`start: ${startDate} === end: ${endDate}`); 
   let i: number = 0;
-  while(endDate.split('/')[0] !== "30" && i < 5){
-    setTimeout(() => {
-      let loginCount = getSignUpOrLogInCount(sessions, startDate, endDate, "loginCount");
-      retention.push(Math.floor(loginCount / whole * 100));
-      startDate = endDate;
-      endDate = getEndDate(startDate);
-      console.log(`start: ${startDate} === end: ${endDate}`);
-      i++;
-    }, 2000);
+  while(endDate.split('/')[0] !== "30"){
+    let loginCount = getSignUpOrLogInCount(sessions, startDate, endDate, "loginCount");
+    retention.push(Math.floor(loginCount / whole * 100));
+    startDate = endDate;
+    endDate = getEndDate(startDate);
+    console.log(`start: ${startDate} === end: ${endDate}`);
+    i++;
   }
   console.log("OUT OF THE INNER LOOP");
   return retention;
 }
+
+// export const getPaths = (n:number, endNode:number[]): Array<number[]> => {
+//   let paths:Array<number[]> = [];
+//   let arr = [];
+//   for(let i = 1; i < n + 1; i++){
+//       arr.push(i);
+//   }
+//   for (let j = 0; j < endNode.length - 1; j++) {
+//       let startValue = endNode[j]; // 1
+//       let endValue = endNode[j + 1];// 3
+//       let newPath = [];
+//       let currentIndex = startValue - 1;
+//       while(arr[currentIndex] !== endValue) {
+//           newPath.push(arr[currentIndex]);
+//           currentIndex++;
+//           if(currentIndex === arr.length){
+//               currentIndex = 0;
+//           }
+//       }     
+//       newPath.push(endValue);  
+//       paths.push(newPath);
+//   }
+//   return paths;
+// }
+
+// export const mostRecurringValue = (arr: Array<number[]>):number => {
+//   const flatArr = arr.flat();
+//   let counterArr: number[][] = new Array(Math.max(...flatArr));
+//     for (let i = 0; i < flatArr.length; i++) {
+//       let currentValue = flatArr[i];
+//       let valueArr = flatArr.filter(value => value === currentValue)
+//       counterArr[i] = [currentValue, valueArr.length];
+//   }
+//   let recurringValue:number = 0;
+//   let maxCount = 0;
+//   for (let j = 0; j < counterArr.length; j++) {
+//     if(counterArr[j][1] > maxCount){
+//       recurringValue = counterArr[j][0];
+//       maxCount = counterArr[j][1];
+//     }
+//   }
+//   return recurringValue;
+// }
