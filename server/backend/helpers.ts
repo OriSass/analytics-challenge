@@ -280,28 +280,25 @@ export const getSessionsByDays = (): DayAndSessionCount[] => {
 
 export const getRetentionCohort = (dayZero:number) : weeklyRetentionObject[] => {
   let retention:weeklyRetentionObject[] = []; 
-  const sessions: DayAndSessionCount[] = getSessionsByDays();
-  let startDate:number = dayZero;
+  let startDate:number = new Date (new Date(dayZero).toDateString()).getTime();
   let endDate:number = startDate + OneWeek; 
-  let now:number = Date.now();
+  let now:number = new Date (new Date().toDateString()).getTime();
   let index:number = 0;
-  //let whole:number = getSignUpOrLogInCount(sessions, startDate, endDate, "signUpCount");
   while(startDate <= now){
+    let newUsers = getUsersIds(startDate, endDate, "signup");
     let rObj: weeklyRetentionObject = {
       registrationWeek: index, 
-      newUsers: 5, 
-      //weeklyRetention: getWeeklyRetention(sessions, startDate, endDate, whole), // helper function getWeeklyRetention: number[]
-      weeklyRetention: [],
+      newUsers: newUsers.length, 
+      weeklyRetention: getWeeklyRetention(startDate, endDate, newUsers, now), // helper function getWeeklyRetention: number[]
       start: msToDate(startDate),
       end: msToDate(endDate)
     } 
     retention.push(rObj);
-    console.log('pushed');
-    startDate = endDate + OneDay;
+    startDate = endDate;
     endDate = startDate + OneWeek;
     index++;
   }
-  //const weekStart = new Date (new Date(dayZero + (i * OneWeek)).setHours(0,0,0,0)).getTime();
+  //const weekStart = new Date (new Date(dayZero + (i * OneWeek)).toDateString()).getTime();
 
   console.log("OUT OF THE OUTER LOOP");
   // need to know how many signed up that week= getSignUpCount(start: string, end: string): number
@@ -334,24 +331,36 @@ export const getEndDate = (startDate: string): string => {//  24/10/2020
   return endDate;
 }
 
-export const getWeeklyRetention = (sessions: DayAndSessionCount[], startDate: string, endDate: string, whole: number): number[] => {
+export const getWeeklyRetention = (startDate: number, endDate: number, newUsers: string[], currentTime:number): number[] => {
   let retention:number[] = [100];
   startDate = endDate;
-  endDate = getEndDate(startDate);
-  console.log(`start: ${startDate} === end: ${endDate}`); 
-  let i: number = 0;
-  while(endDate.split('/')[0] !== "30"){
-    let loginCount = getSignUpOrLogInCount(sessions, startDate, endDate, "loginCount");
-    retention.push(Math.floor(loginCount / whole * 100));
+  endDate = startDate + OneWeek;
+  while(startDate <= currentTime){
+    let loggedUsers:string[] = getUsersIds(startDate, endDate, "login");
+    const validatedUsers:string[] = loggedUsers.filter((user: string) => newUsers.includes(user));
+    let percant:number = Math.round((validatedUsers.length / newUsers.length) * 100);
+    retention.push(percant);
     startDate = endDate;
-    endDate = getEndDate(startDate);
-    console.log(`start: ${startDate} === end: ${endDate}`);
-    i++;
+    endDate += OneWeek;
   }
-  console.log("OUT OF THE INNER LOOP");
   return retention;
 }
 
+export const getUsersIds = (startDate: number, endDate: number, byEvent: "login" | "signup"): string[] => {
+  let events: Event[] = getAllEvents();
+  sortByDate(events, '+');
+  events = events.filter((e: Event) => 
+    (e.date as number >= startDate &&
+     e.date as number <= endDate &&
+     e.name === byEvent));
+  let userIds: string[] = [];
+  events.forEach((e: Event) =>{
+    if(userIds.includes(e.distinct_user_id) === false){
+      userIds.push(e.distinct_user_id);
+    }
+  })
+  return userIds;
+}
 // export const getPaths = (n:number, endNode:number[]): Array<number[]> => {
 //   let paths:Array<number[]> = [];
 //   let arr = [];

@@ -47,14 +47,22 @@ describe("main test", () => {
 
   it("can get unique sessions count by day", async () => {
     const { body: sessionsByDays } = await request(app).get("/events/by-days/0").expect(200)
-
+    console.log(111,sessionsByDays)
     expect(sessionsByDays.length).toBe(7)
     expect(sessionsByDays.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(145
       )
     expect(sessionsByDays[0].count).toBe(19);
-
+    // [
+    //   { date: '10/22/2020', count: 11 },
+    //   { date: '10/23/2020', count: 9 },
+    //   { date: '10/24/2020', count: 8 },
+    //   { date: '10/25/2020', count: 9 },
+    //   { date: '10/26/2020', count: 12 },
+    //   { date: '10/27/2020', count: 15 },
+    //   { date: '10/28/2020', count: 14 }
+    // ]
     const { body: sessionsByDays2 } = await request(app).get("/events/by-days/7").expect(200)
-
+    console.log(333,sessionsByDays2)
     expect(sessionsByDays2.length).toBe(7)
     expect(sessionsByDays2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(78)
     expect(sessionsByDays2[0].count).toBe(11);
@@ -64,10 +72,7 @@ describe("main test", () => {
 
   it("can get unique sessions count by hour", async () => {
     const { body: sessionsByHours } = await request(app).get("/events/by-hours/0").expect(200)
-
     expect(sessionsByHours.length).toBe(24)
-    console.log(sessionsByHours);
-    
     expect(sessionsByHours.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(7)
 
     const { body: sessionsByHours2 } = await request(app).get("/events/by-hours/2").expect(200)
@@ -76,26 +81,28 @@ describe("main test", () => {
     expect(sessionsByHours2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(25)
   });
 
-  it.only("retention cohort", async () => {
+  it("retention cohort", async () => {
     const today = new Date (new Date().toDateString()).getTime()+6*OneHour
     const dayZero = today-5*OneWeek
 
     const { body: retentionData } = await request(app).get(
       `/events/retention?dayZero=${dayZero}`
     ).expect(200);
-    console.log(dayZero);
+    console.log(retentionData);
     
-    console.log(retentionData)
-
     expect(retentionData.length).toBe(6);
-    
-    expect(retentionData[0].weeklyRetention).toEqual([ 100, 40, 60, 90, 80, 0 ]);
+
+    expect(retentionData[0].newUsers).toBe(10);
+    expect(retentionData[0].weeklyRetention).toEqual([ 100, 30, 60, 90, 80, 0 ]);
+    expect(retentionData[1].newUsers).toBe(10);
     expect(retentionData[1].weeklyRetention).toEqual([ 100, 90, 60,100,0 ]);
+    expect(retentionData[2].newUsers).toBe(11);
     expect(retentionData[2].weeklyRetention).toEqual([ 100, 100, 82, 9 ]);
     expect(retentionData[4].newUsers).toBe(9);
-
+    expect(retentionData[4].weeklyRetention).toEqual([ 100, 44 ]);
 
   });
+ 
   it("can filter events by browser", async () => {
 
     const { body: events}  = await request(app).get("/events/all-filtered")
@@ -141,7 +148,10 @@ describe("main test", () => {
   })
 
   it("can post new event", async () => {
-    await request(app).post("/events").send(mockData.events[0]).expect(200);
+    await request(app).post("/events").send(mockData.events[0])
+    .expect(({status})=>{
+      if(status!==200 && status !== 201) throw new Error(`Expected Status to be '200 OK' Or '201 Created', instead received ${status}`)
+    });
     const { body: allEvents2 } = await request(app).get("/events/all").expect(200);
     expect(allEvents2.length).toBe(301);
     expect(allEvents2[300].date).toBe(mockData.events[0].date);
