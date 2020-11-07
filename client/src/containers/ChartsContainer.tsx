@@ -1,20 +1,16 @@
 import React from "react";
 import { Interpreter } from "xstate";
 import { AuthMachineContext, AuthMachineEvents } from "../machines/authMachine";
-import GoogleMapEvents from "../components/Dashboard/GoogleMapEvents";
-import RetentionCohort from "../components/Dashboard/RetentionCohort";
 
 export interface Props {
   authService: Interpreter<AuthMachineContext, any, AuthMachineEvents, any>;
 }
 
-const DashBoard: React.FC = () => {
+const ChartsContainer: React.FC = () => {
   return (
     <>
-    <GoogleMapEvents />
-    <RetentionCohort />
     </>
   );
 };
 
-export default DashBoard;
+export default ChartsContainer;

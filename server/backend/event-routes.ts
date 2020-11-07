@@ -23,7 +23,7 @@ router.get('/all', (req: Request, res: Response) => {
   try {    
     res.json(getAllEvents());
   } catch (error) {
-    res.status(404).send(`\nWhoops! Didn't find any data!\n`)
+    res.status(404).send(`\n${error.message}\n`)
   }    
 });
 

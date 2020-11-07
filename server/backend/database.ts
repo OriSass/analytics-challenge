@@ -94,6 +94,8 @@ const BANK_TRANSFER_TABLE = "banktransfers";
 const EVENT_TABLE = "events";
 
 const databaseFile = path.join(__dirname, "../data/database.json");
+
+
 const adapter = new FileSync<DbSchema>(databaseFile);
 
 const db = low(adapter);

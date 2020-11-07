@@ -73,9 +73,6 @@ export const updateDb = (updatedData: Database): void => {
 // returns an event array with dates in dd/mm/yy instead of milliseconds
 export const getAllEventsWithNormalDates = (events: Event[]): Event[] => {
   events.forEach((e: Event, i:number) => {
-    // if(i === events.length - 1){
-    //   console.log(e.date);
-    // }
     e.date = msToDate(e.date as number);
   });
   return events;
@@ -89,7 +86,6 @@ export const msToDate = (ms: number): string => {
   const month = wierdDate.split("/")[0];
   const year = wierdDate.split("/")[2];
   const normalDate = `${day}/${month}/${year}`;
-  //console.log(`ms to normal date: ${normalDate}`);
   return normalDate;
 }
 // returns an event array with hours in "hh:mm" instead of milliseconds
@@ -166,7 +162,6 @@ export const getEventsDitsinctByHour = (events: Event[]): HourAndSessionCount[] 
       if(hour.split(':')[0].length === 1){
         hour = '0' + hour;
       }
-      console.log(hour);
       for (let i = 0; i < eByHours.length; i++) {
         if(eByHours[i].hour === hour){
           eByHours[i].count++;
@@ -249,24 +244,17 @@ export const filterEvents = (events: Event[], filters: Filter): FilteredEvents =
 // returns only the events from a specific date
 export const getAllSessionFromDate = (filterDate: string): Event[] => {
   let events: Event[] = getAllEvents();
-  //let startLength:number = events.length;
   sortByDate(events, '+');
   events = getAllEventsWithNormalDateTime(events);
-  //let endLength:number = events.length;
-  //console.log(startLength === endLength);
-  //console.log('=======================================');
   events = events.filter((e: Event) => {
     if(typeof e.date === "string"){
       const currentEventDate = e.date.split(',')[0];
-      //console.log(currentEventDate);
       return currentEventDate === filterDate;
     }
     else{
-      console.log('SORRY, DATE IS A NUMBER');
       return false;
     } 
   });
-  //console.log(events);
   return events;
 }
 
@@ -298,10 +286,6 @@ export const getRetentionCohort = (dayZero:number) : weeklyRetentionObject[] => 
     endDate = startDate + OneWeek;
     index++;
   }
-  //const weekStart = new Date (new Date(dayZero + (i * OneWeek)).toDateString()).getTime();
-
-  console.log("OUT OF THE OUTER LOOP");
-  // need to know how many signed up that week= getSignUpCount(start: string, end: string): number
   return retention;
 }
 // gets the number of new users or logins between 2 dates
@@ -321,10 +305,8 @@ export const getSignUpOrLogInCount = (daysAndSessions: DayAndSessionCount[], sta
 // recives a start date and returns the end date, handling the half week scenarios
 export const getEndDate = (startDate: string): string => {//  24/10/2020
   const startDay:number = parseInt(startDate.split('/')[0]); //24
-  console.log(`start day is: ${startDay}`);
   const startMonth:string = startDate.split('/')[1] //10
-  const startYear:string = startDate.split('/')[2] //2020
-  //const endDay:number = ((30 - startDay) < 7) ? 30: startDay + 7; 
+  const startYear:string = startDate.split('/')[2] //2020 
   const endDay:number = startDay + 7 > 30 ? 30 : startDay + 7;
   const endDate:string = `${endDay}/${startMonth}/${startYear}`;
   console.log(`new endDate is: ${endDate}`);

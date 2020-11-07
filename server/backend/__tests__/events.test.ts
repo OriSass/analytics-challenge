@@ -47,7 +47,7 @@ describe("main test", () => {
 
   it("can get unique sessions count by day", async () => {
     const { body: sessionsByDays } = await request(app).get("/events/by-days/0").expect(200)
-    console.log(111,sessionsByDays)
+    
     expect(sessionsByDays.length).toBe(7)
     expect(sessionsByDays.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(145
       )
@@ -88,7 +88,6 @@ describe("main test", () => {
     const { body: retentionData } = await request(app).get(
       `/events/retention?dayZero=${dayZero}`
     ).expect(200);
-    console.log(retentionData);
     
     expect(retentionData.length).toBe(6);
 
