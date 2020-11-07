@@ -6,8 +6,8 @@ import { Request, Response } from "express";
 // some useful database functions in here:
 import {
 } from "./database";
-import { os, GeoLocation, browser, Event, eventName, weeklyRetentionObject, DayAndSessionCount, Database, Filter, FilteredEvents, HourAndSessionCount, BrowserCount } from "../../client/src/models/event";
-import { ensureAuthenticated, validateMiddleware, getAllEvents, getBrowsersDistribution, getEndDate, getRetentionCohort, sortByDate, getAllEventsWithNormalDates, getAllEventsWithNormalDateTime, getEventsDitsinctByDay, updateDb, filterEvents, getEventsDitsinctByHour, getSessionsByDays, getAllSessionFromDate } from "./helpers";
+import { os, GeoLocation, browser, Event, BrowserDistribution, eventName, weeklyRetentionObject, DayAndSessionCount, Database, Filter, FilteredEvents, HourAndSessionCount, BrowserCount } from "../../client/src/models/event";
+import { ensureAuthenticated, validateMiddleware, getAllEvents, getBrowserDistribution, getBrowsersCount, getEndDate, getRetentionCohort, sortByDate, getAllEventsWithNormalDates, getAllEventsWithNormalDateTime, getEventsDitsinctByDay, updateDb, filterEvents, getEventsDitsinctByHour, getSessionsByDays, getAllSessionFromDate } from "./helpers";
 import {
   shortIdValidation,
   searchValidation,
@@ -80,11 +80,10 @@ router.get('/:eventId',(req : Request, res : Response) => {
 });
 
 
-router.get('/chart/os/:time',(req: Request, res: Response) => {
-  const browsers:BrowserCount[] = getBrowsersDistribution();
-  console.log(browsers);
-  
-  res.send('browsers');
+router.get('/chart/os',(req: Request, res: Response) => {
+  const browserAndCount:BrowserCount[] = getBrowsersCount();
+  const browserDistribution: BrowserDistribution[] = getBrowserDistribution(browserAndCount);
+  res.json(browserDistribution);
 })
 
   

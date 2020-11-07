@@ -73,4 +73,9 @@ export interface BrowserCount{
   count:number
 }
 
+export interface BrowserDistribution{
+  browser:browser,
+  percent:number
+}
+
 export type value = string | number | eventName | os | GeoLocation | browser;

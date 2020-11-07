@@ -14,7 +14,8 @@ import {
   Filter,
   FilteredEvents,
   DaySummary,
-  BrowserCount
+  BrowserCount,
+  BrowserDistribution
 } from "../../client/src/models/event";
 import { log } from "console";
 import { OneDay, OneWeek } from "./timeFrames";
@@ -345,7 +346,7 @@ export const getUsersIds = (startDate: number, endDate: number, byEvent: "login"
   return userIds;
 }
 
-export const getBrowsersDistribution = ():BrowserCount[] => {
+export const getBrowsersCount = ():BrowserCount[] => {
   const events:Event[] = getAllEvents();
   const browsers:BrowserCount[] = [
     {
@@ -379,9 +380,16 @@ export const getBrowsersDistribution = ():BrowserCount[] => {
       }
     }
   })
-  console.log(browsers);
-  
   return browsers;
+}
+export const getBrowserDistribution = (browserAndCount:BrowserCount[]):BrowserDistribution[] => {
+  const total = getAllEvents().length;
+  const browsersDistribution: BrowserDistribution[] = browserAndCount.map((bAndCount: BrowserCount) =>{
+    const percent = Math.round(bAndCount.count / total * 100);
+    let currentBrowser: BrowserDistribution = {browser: bAndCount.browser, percent};
+    return currentBrowser;
+  })
+  return browsersDistribution;
 }
 // export const getPaths = (n:number, endNode:number[]): Array<number[]> => {
 //   let paths:Array<number[]> = [];

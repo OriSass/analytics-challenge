@@ -3,7 +3,7 @@ import axios from "axios";
 import { weeklyRetentionObject } from '../../models/event';
 import { withStyles, Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper} from '@material-ui/core';
-import "./retentionStyle.css"
+
 const DashBoard: React.FC = () => {
 
     const [retention, setRetention] = useState<weeklyRetentionObject[]>();
@@ -50,8 +50,6 @@ const useStyles = makeStyles({
 });
 
 const renderRetention = () => {
-  //const classes = useStyles();
-
   return (
     <TableContainer component={Paper}>
       <Table aria-label="customized table">
@@ -81,26 +79,6 @@ const renderRetention = () => {
         </TableBody>
       </Table>
     </TableContainer>
-    // <table className="maTable">
-    //     <th key="header">
-    //         <td></td>
-    //         {retention?.map((week:weeklyRetentionObject, index:number) => {
-    //             return (
-    //             <td>Week{index}</td>
-    //             )
-    //         })}
-    //     </th>
-    //     {retention?.map((week:weeklyRetentionObject, index:number) => {
-    //         return(
-    //         <tr key={`Week${index}`}>
-    //             <td>Week{index}</td>
-    //             {week.weeklyRetention.map((percent:number) => {
-    //                 return(
-    //             <td>{percent}%</td>
-    //             )})}
-    //         </tr>)
-    //     })}
-    // </table>
   );
 }
 
