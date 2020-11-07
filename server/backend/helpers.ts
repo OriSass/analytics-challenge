@@ -13,7 +13,8 @@ import {
   Database,
   Filter,
   FilteredEvents,
-  DaySummary
+  DaySummary,
+  BrowserCount
 } from "../../client/src/models/event";
 import { log } from "console";
 import { OneDay, OneWeek } from "./timeFrames";
@@ -225,21 +226,17 @@ export const filterEvents = (events: Event[], filters: Filter): FilteredEvents =
   if (filters.type) {
     events = filterByEventName(events, filters.type);
   }
-  console.log('after event type: ' + events.length);
   if (filters.browser) {
     events = filterByBrowser(events, filters.browser);
   }
-  console.log('after event type and browser: ' + events.length);
   if (filters.search) {
     events = filterBySearchValue(events, filters.search);
   }
-  console.log('after event type, browser and search: ' + events.length);
   let more = false;
   if (filters.offset) {
     events = events.slice(0, filters.offset);
     more = true;
   }
-  console.log('after event type, browser, search and offset: ' + events.length);
   const obj = { events, more };
   return obj;
 };
@@ -346,6 +343,45 @@ export const getUsersIds = (startDate: number, endDate: number, byEvent: "login"
     }
   })
   return userIds;
+}
+
+export const getBrowsersDistribution = ():BrowserCount[] => {
+  const events:Event[] = getAllEvents();
+  const browsers:BrowserCount[] = [
+    {
+      browser:"chrome",
+      count:0
+    },
+    {
+      browser:"safari",
+      count:0
+    },
+    {
+      browser:"edge",
+      count:0
+    },
+    {
+      browser:"firefox",
+      count:0
+    },
+    {
+      browser:"ie",
+      count:0
+    },
+    {
+      browser:"other",
+      count:0
+    }];
+  events.forEach((e:Event) => {
+    for(let i = 0; i < browsers.length;i++){
+      if(browsers[i].browser === e.browser){
+        browsers[i].count++;
+      }
+    }
+  })
+  console.log(browsers);
+  
+  return browsers;
 }
 // export const getPaths = (n:number, endNode:number[]): Array<number[]> => {
 //   let paths:Array<number[]> = [];

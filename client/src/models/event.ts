@@ -68,5 +68,9 @@ export interface DaySummary{
   signUpCount:number,
   loginCount:number
 }
+export interface BrowserCount{
+  browser:browser,
+  count:number
+}
 
 export type value = string | number | eventName | os | GeoLocation | browser;

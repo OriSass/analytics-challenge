@@ -1,26 +1,112 @@
 import React, {useState, useEffect} from "react";
 import axios from "axios";
-//import {OneHour, OneDay, OneWeek} from '../../../../server/backend/timeFrames'
-
-
+import { weeklyRetentionObject } from '../../models/event';
+import { withStyles, Theme, createStyles, makeStyles } from '@material-ui/core/styles';
+import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper} from '@material-ui/core';
+import "./retentionStyle.css"
 const DashBoard: React.FC = () => {
 
-    const [retention, SetRetention] = useState();
+    const [retention, setRetention] = useState<weeklyRetentionObject[]>();
 
     useEffect(()=> {
         getRetention();
     },[])
 
     const getRetention = async() => {
-        // dayZero like the tests
-        // const today = new Date (new Date().toDateString()).getTime()+6*OneHour
-        // const dayZero = today-5*OneWeek
-        // const data = await axios.get(`http://localhost:3001/retention?dayZero=${dayZero}`);
-        // console.log(data);
+        let dayZero = 1601697600000;
+        const {data} = await axios.get(`http://localhost:3001/events/retention?dayZero=${dayZero}`);
+        setRetention(data);
+        console.log(data);
     }
+
+
+const StyledTableCell = withStyles((theme: Theme) =>
+  createStyles({
+    head: {
+      backgroundColor: theme.palette.common.black,
+      color: theme.palette.common.white,
+    },
+    body: {
+      fontSize: 14,
+    },
+  }),
+)(TableCell);
+
+const StyledTableRow = withStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      '&:nth-of-type(odd)': {
+        backgroundColor: theme.palette.action.hover,
+      },
+    },
+  }),
+)(TableRow);
+
+
+const useStyles = makeStyles({
+  table: {
+    minWidth: 700,
+  },
+});
+
+const renderRetention = () => {
+  //const classes = useStyles();
+
   return (
+    <TableContainer component={Paper}>
+      <Table aria-label="customized table">
+        <TableHead>
+          <TableRow>
+          <StyledTableCell></StyledTableCell>
+              {retention?.map((week: weeklyRetentionObject, index: number) => {
+                  return <StyledTableCell>Week {index}</StyledTableCell>
+              })}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {retention?.map((week: weeklyRetentionObject, index:number) => (
+            <StyledTableRow key={index}>
+                <StyledTableCell component="th" scope="row">
+                    <p>Week {index}</p>
+                    <p>New Users: {week.newUsers}</p>
+                </StyledTableCell>
+                {week.weeklyRetention.map((percent:number) => {
+                    return(
+                    <StyledTableCell component="th" scope="row">
+                    {percent === null ? 0 : (percent)}%
+                  </StyledTableCell>);
+                })}
+              </StyledTableRow>
+              ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+    // <table className="maTable">
+    //     <th key="header">
+    //         <td></td>
+    //         {retention?.map((week:weeklyRetentionObject, index:number) => {
+    //             return (
+    //             <td>Week{index}</td>
+    //             )
+    //         })}
+    //     </th>
+    //     {retention?.map((week:weeklyRetentionObject, index:number) => {
+    //         return(
+    //         <tr key={`Week${index}`}>
+    //             <td>Week{index}</td>
+    //             {week.weeklyRetention.map((percent:number) => {
+    //                 return(
+    //             <td>{percent}%</td>
+    //             )})}
+    //         </tr>)
+    //     })}
+    // </table>
+  );
+}
+
+  return (
+      retention ? renderRetention():
     <>
-    RETENTION
     </>
   );
 };

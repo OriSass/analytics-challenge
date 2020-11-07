@@ -30,16 +30,12 @@ const GoogleMapEvents: React.FC = () => {
   const fetchEvents = async() => {
       const {data} = await axios.get('http://localhost:3001/events/all');
       setEvents(data);
-      console.log(data);
   }
   const options = {
     imagePath:
       'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m', // so you must have m1.png, m2.png, m3.png, m4.png, m5.png and m6.png in that folder
   }
   
-  function createKey(location: Location) {
-    return location.lat + location.lng
-  }
   
   const MapWithMarkerClusterer = () => {
     if(events){
@@ -47,8 +43,8 @@ const GoogleMapEvents: React.FC = () => {
         <GoogleMap id='marker-example' mapContainerStyle={containerStyle} zoom={3} center={defaultCenter}>
           <MarkerClusterer options={options}>
             {(clusterer) =>
-              events.map((e:Event) => (
-                <Marker key={createKey(e.geolocation.location)} position={e.geolocation.location} clusterer={clusterer} />
+              events.map((e:Event, index:number) => (
+                <Marker key={index} position={e.geolocation.location} clusterer={clusterer} />
               ))
             }
           </MarkerClusterer>

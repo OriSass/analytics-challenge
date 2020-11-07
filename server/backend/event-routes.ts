@@ -6,8 +6,8 @@ import { Request, Response } from "express";
 // some useful database functions in here:
 import {
 } from "./database";
-import { os, GeoLocation, browser, Event, eventName, weeklyRetentionObject, DayAndSessionCount, Database, Filter, FilteredEvents, HourAndSessionCount } from "../../client/src/models/event";
-import { ensureAuthenticated, validateMiddleware, getAllEvents, getEndDate, getRetentionCohort, sortByDate, getAllEventsWithNormalDates, getAllEventsWithNormalDateTime, getEventsDitsinctByDay, updateDb, filterEvents, getEventsDitsinctByHour, getSessionsByDays, getAllSessionFromDate } from "./helpers";
+import { os, GeoLocation, browser, Event, eventName, weeklyRetentionObject, DayAndSessionCount, Database, Filter, FilteredEvents, HourAndSessionCount, BrowserCount } from "../../client/src/models/event";
+import { ensureAuthenticated, validateMiddleware, getAllEvents, getBrowsersDistribution, getEndDate, getRetentionCohort, sortByDate, getAllEventsWithNormalDates, getAllEventsWithNormalDateTime, getEventsDitsinctByDay, updateDb, filterEvents, getEventsDitsinctByHour, getSessionsByDays, getAllSessionFromDate } from "./helpers";
 import {
   shortIdValidation,
   searchValidation,
@@ -71,6 +71,7 @@ router.get('/week', (req: Request, res: Response) => {
 
 router.get('/retention', (req: Request, res: Response) => {
   const dayZero:number = parseInt(req.query.dayZero);
+  console.log(dayZero);  
   const retention: weeklyRetentionObject[] = getRetentionCohort(dayZero);
   res.send(retention);
 });
@@ -80,7 +81,10 @@ router.get('/:eventId',(req : Request, res : Response) => {
 
 
 router.get('/chart/os/:time',(req: Request, res: Response) => {
-  res.send('/chart/os/:time')
+  const browsers:BrowserCount[] = getBrowsersDistribution();
+  console.log(browsers);
+  
+  res.send('browsers');
 })
 
   
