@@ -1,7 +1,7 @@
 {
   "name": "cypress-realworld-app",
   "version": "1.0.0",
-  "description": "A payment application to demonstrate **real-world** usage of Cypress testing methods, patterns, and workflows. For a full reference of our documentation, go to https://docs.cypress.io",
+  "description": "A payment application to demonstrate *real-world* usage of Cypress testing methods, patterns, and workflows. For a full reference of our documentation, go to https://docs.cypress.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress-realworld-app.git"
@@ -52,7 +52,7 @@
     "express-validator": "6.6.1",
     "faker": "5.1.0",
     "fuse.js": "6.4.1",
-    "husky": "^4.3.0",
+    "husky": "4.3.0",
     "jest": "^26.6.1",
     "json": "10.0.0",
     "lowdb": "1.0.0",
@@ -93,7 +93,6 @@
     "prestart": "npm run db:seed:dev",
     "start": "npm run start:api",
     "start:api": "npm run tsnode --files ./backend",
-    "start:watch": "nodemon",
     "db:seed": "npm run tsnode scripts/generateSeedData",
     "tsnode": "nyc --silent ts-node -P ./tsconfig.tsnode.json",
     "postdb:seed": "npm run db:seed:dev",
@@ -117,30 +116,17 @@
     "test:unit": "react-scripts test --runInBand",
     "test:unit:ci": "react-scripts test --watch false --runInBand",
     "start:react:proxy-server": "yarn tsnode scripts/testServer.ts",
-    "prettier": "prettier --write '**/**.{ts,js,tsx}' '*.{json,md,yml}'",
+    "prettier": "prettier --write '*/.{ts,js,tsx}' '.{json,md,yml}'",
     "tsnode:not-instrumented": "ts-node -P tsconfig.tsnode.json",
     "db:seed:empty": "ncp ./data/empty-seed.json ./data/database.json",
     "prestart:empty": "yarn db:seed:empty",
     "prebuild": "yarn types",
     "react-start": "react-scripts start",
-    "nodemon": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'tsnode' src/index.ts",
+    "nodemon": "nodemon --watch 'src/*/.ts' --ignore 'src/*/.spec.ts' --exec 'tsnode' src/index.ts",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
     "codesandbox:start:api": "yarn tsnode:not-instrumented --files backend/app.ts",
     "codesandbox:start": "NODE_ENV=development TSC_COMPILE_ON_ERROR=true concurrently \"react-scripts start\" yarn:start:api:codesandbox"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "**/*.test.ts",
-      "**/*.spec.ts",
-      ".git",
-      "node_modules"
-    ],
-    "watch": [
-      "src"
-    ],
-    "exec": "npm start",
-    "ext": "ts"
   },
   "eslintConfig": {
     "env": {
