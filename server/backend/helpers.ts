@@ -205,7 +205,7 @@ export const filterBySearchValue = (
   if (searchValue) {
     return events.filter((e) => {
       for (const [key, value] of Object.entries(e)) {
-        if (typeof value !== "object") {
+        if (typeof value !== "object" && key !== "date") {
           if (value.toString().includes(searchValue)) {
             return true;
           }
@@ -221,21 +221,25 @@ export const filterBySearchValue = (
 export const filterEvents = (events: Event[], filters: Filter): FilteredEvents => {
   if (filters.sorting) {
     sortByDate(events, filters.sorting[0]);
-  }
+  }  
   if (filters.type) {
     events = filterByEventName(events, filters.type);
   }
+  console.log('after event type: ' + events.length);
   if (filters.browser) {
     events = filterByBrowser(events, filters.browser);
   }
+  console.log('after event type and browser: ' + events.length);
   if (filters.search) {
     events = filterBySearchValue(events, filters.search);
   }
+  console.log('after event type, browser and search: ' + events.length);
   let more = false;
   if (filters.offset) {
     events = events.slice(0, filters.offset);
     more = true;
   }
+  console.log('after event type, browser, search and offset: ' + events.length);
   const obj = { events, more };
   return obj;
 };
