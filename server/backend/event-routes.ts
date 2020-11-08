@@ -7,7 +7,7 @@ import { Request, Response } from "express";
 import {
 } from "./database";
 import { os, GeoLocation, browser, Event, BrowserDistribution, eventName, weeklyRetentionObject, DayAndSessionCount, Database, Filter, FilteredEvents, HourAndSessionCount, BrowserCount } from "../../client/src/models/event";
-import { ensureAuthenticated, validateMiddleware, getAllEvents, getBrowserDistribution, getBrowsersCount, getEndDate, getRetentionCohort, sortByDate, getAllEventsWithNormalDates, getAllEventsWithNormalDateTime, getEventsDitsinctByDay, updateDb, filterEvents, getEventsDitsinctByHour, getSessionsByDays, getAllSessionFromDate } from "./helpers";
+import { ensureAuthenticated, validateMiddleware, getAllEvents, getBrowserDistribution, getBrowsersCount, getEndDate, getRetentionCohort, sortByDate, getAllEventsWithNormalDates, getAllEventsWithNormalDateTime, getEventsDitsinctByDay, addNewEvent, filterEvents, getEventsDitsinctByHour, getSessionsByDays, getAllSessionFromDate } from "./helpers";
 import {
   shortIdValidation,
   searchValidation,
@@ -15,13 +15,14 @@ import {
   isUserValidator,
 } from "./validators";
 import { values } from "lodash";
+import db from "./database";
 const router = express.Router();
 const fs = require('fs');
 
 // Routes
 router.get('/all', (req: Request, res: Response) => {
   try {  
-    console.log("first endpoint");
+    //console.log("first endpoint");
       
     res.json(getAllEvents());
   } catch (error) {
@@ -57,12 +58,15 @@ router.get('/by-days/:offset', (req: Request, res: Response) => {
 });
 
 router.get('/by-hours/:offset', (req: Request, res: Response) => {
-    const sessionsByDay = getSessionsByDays();
-    const offset:number = parseInt(req.params.offset);
-    const filterDate = sessionsByDay[sessionsByDay.length - 1 - offset].date;
-    console.log(filterDate);
-    const sessionsOfDate = getAllSessionFromDate(filterDate);
-    res.json(getEventsDitsinctByHour(sessionsOfDate));
+    try {
+      const sessionsByDay = getSessionsByDays();
+      const offset:number = parseInt(req.params.offset);
+      const filterDate = sessionsByDay[sessionsByDay.length - 1 - offset].date;
+      const sessionsOfDate = getAllSessionFromDate(filterDate);
+      res.json(getEventsDitsinctByHour(sessionsOfDate));
+    } catch (error) {
+      console.log(error);
+    }
 });
 
 router.get('/today', (req: Request, res: Response) => {
@@ -105,13 +109,8 @@ router.get('/chart/geolocation/:time',(req: Request, res: Response) => {
 
 
 router.post('/', (req: Request, res: Response) => {
-  const events = getAllEvents();
   const newEvent: Event = req.body;
-  events.push(newEvent);
-  const newData:Database = {
-    events: events
-  };
-  updateDb(newData);
+  db.get('events').push(newEvent).write();
   res.status(200).send('Database up to date!');
 });
 

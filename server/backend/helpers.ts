@@ -61,34 +61,44 @@ export function AdminValidation(req: Request, res: Response, next: NextFunction)
 export const getAllEvents = (): Event[] => {
   //const data = fs.readFileSync("./data/database.json");
   const events = db.get("events").value();
+  const a = events.reduce((some:boolean, e:Event) => typeof e.date === "number", true);
+    console.log(a);
   return events;
 };
 
-export const updateDb = (updatedData: Database): void => {
-  const updatedJson = JSON.stringify(updatedData);
-  fs.writeFile("./data/database.json", updatedJson, (err: Error) => {
-    if (err) {
-      console.log(err.message);
-    }
-  });
+export const addNewEvent = (newEvent: Event): void => {
+  db.get('events').push(newEvent).write();
 };
 
 // returns an event array with dates in dd/mm/yy instead of milliseconds
 export const getAllEventsWithNormalDates = (events: Event[]): Event[] => {
-  events.forEach((e: Event, i:number) => {
-    e.date = msToDate(e.date as number);
+  events.forEach((e: Event) => {
+    if(typeof e.date === "string"){
+      console.log(e.date); 
+    }
+    else{
+      e.date = msToDate(e.date as number);
+    }
   });
+  const a = events.reduce((some:Boolean, e:Event) => typeof e.date === "number", true);
+  console.log(a);
   return events;
 };
 // recieves a date in ms and returns dd/mm/yy
 export const msToDate = (ms: number): string => {
   const dateObj = new Date(ms);
+  
   const dateAndHour: string = dateObj.toLocaleString("en-US", { timeZoneName: "short" }); // FORMAT: MM/DD/YYYY, 10:30:15 AM CST
   const wierdDate: string = dateAndHour.split(",")[0];
   const day = wierdDate.split("/")[1];
   const month = wierdDate.split("/")[0];
   const year = wierdDate.split("/")[2];
   const normalDate = `${day}/${month}/${year}`;
+  if(normalDate === "undefined/Invalid Date/undefined"){
+    console.log('==========================================================');
+    console.log(`MILISECS: ${ms}`);
+    console.log(dateObj);
+  }
   return normalDate;
 }
 // returns an event array with hours in "hh:mm" instead of milliseconds
@@ -100,10 +110,14 @@ export const getAllEventsWithNormalDateTime = (events: Event[]): Event[] => {
     const day = wierdDate.split("/")[1];
     const month = wierdDate.split("/")[0];
     const year = wierdDate.split("/")[2];
-
-    const weirdTime: string = dateAndHour.split(",")[1].slice(1,8);
-    const hour = weirdTime.split(":")[0];
-    e.date = `${day}/${month}/${year},${hour}:00`;
+    if(dateAndHour.split(",")[1] === undefined){
+      console.log(e);
+    }
+    else{
+      const weirdTime: string = dateAndHour.split(",")[1].slice(1,8);
+      const hour = weirdTime.split(":")[0];
+      e.date = `${day}/${month}/${year},${hour}:00`;
+    }
   });
   return events;
 };

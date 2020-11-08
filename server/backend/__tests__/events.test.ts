@@ -37,11 +37,15 @@ describe("main test", () => {
 
   it("can get all events", async () => {
     const { body: allEvents } = await request(app).get("/events/all").expect(200);
+    // const a = allEvents.reduce((some:boolean, e:event) => typeof e.date === "number", true);
+    // console.log(a);
     expect(allEvents.length).toBe(300);
   });
 
   it("getting all events from the server must return array of event types", async () => {
     const { body: allEvents } = await request(app).get("/events/all").expect(200);
+    // const a = allEvents.reduce((some:boolean, e:event) => typeof e.date === "number", true);
+    // console.log(a);
     expect(isEventArray(allEvents)).toBe(true);
   });
 
@@ -62,7 +66,7 @@ describe("main test", () => {
     //   { date: '10/28/2020', count: 14 }
     // ]
     const { body: sessionsByDays2 } = await request(app).get("/events/by-days/7").expect(200)
-    console.log(333,sessionsByDays2)
+    console.log(sessionsByDays2);
     expect(sessionsByDays2.length).toBe(7)
     expect(sessionsByDays2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(78)
     expect(sessionsByDays2[0].count).toBe(11);
@@ -70,7 +74,7 @@ describe("main test", () => {
     expect(sessionsByDays2[6].count).toBe(14);
   });
 
-  it("can get unique sessions count by hour", async () => {
+  it.only("can get unique sessions count by hour", async () => {
     const { body: sessionsByHours } = await request(app).get("/events/by-hours/0").expect(200)
     expect(sessionsByHours.length).toBe(24)
     expect(sessionsByHours.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(7)
@@ -123,7 +127,6 @@ describe("main test", () => {
       search: "100"
     })
     .expect(200);
-    console.log(events.events);
     
     expect(events.events.length).toBe(2);
     expect(events.events[0].session_id).toMatch(/100/i)
@@ -137,12 +140,14 @@ describe("main test", () => {
       sorting: "-date"
     })
     .expect(200);
+    //console.log(events);
     const { body: events2}  = await request(app).get("/events/all-filtered")
     .query({
       offset: 5,
       sorting: "+date"
     })
     .expect(200);
+    //console.log(events2);
     expect(events.events[0].date).toBeGreaterThan(events2.events[0].date)
     expect(events.events[0].date).toBeGreaterThan(events.events[4].date)
     expect(events2.events[1].date).toBeGreaterThan(events2.events[0].date)

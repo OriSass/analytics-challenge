@@ -69,6 +69,7 @@ import {
   isCommentNotification,
 } from "../../client/src/utils/transactionUtils";
 import { DbSchema } from "../../client/src/models/db-schema";
+import process from "process";
 
 
 export type TDatabase = {
@@ -93,7 +94,7 @@ const NOTIFICATION_TABLE = "notifications";
 const BANK_TRANSFER_TABLE = "banktransfers";
 const EVENT_TABLE = "events";
 
-const databaseFile = path.join(__dirname, "../data/database.json");
+const databaseFile = path.join(__dirname, process.env.NODE_ENV === "test" ? "../data/database-events.json" : "../data/database.json");
 
 
 const adapter = new FileSync<DbSchema>(databaseFile);
@@ -101,12 +102,12 @@ const adapter = new FileSync<DbSchema>(databaseFile);
 const db = low(adapter);
 
 export const seedDatabase = () => {
-  const testSeed = JSON.parse(
-    fs.readFileSync(path.join(process.cwd(), "data", "database-seed.json"), "utf-8")
-  );
+  // const testSeed = JSON.parse(
+  //   fs.readFileSync(path.join(process.cwd(), "data", "database-seed.json"), "utf-8")
+  // );
 
-  // seed database with test data
-  db.setState(testSeed).write();
+  // // seed database with test data
+  // db.setState(testSeed).write();
   return;
 };
 
