@@ -20,9 +20,13 @@ const fs = require('fs');
 
 // Routes
 router.get('/all', (req: Request, res: Response) => {
-  try {    
+  try {  
+    console.log("first endpoint");
+      
     res.json(getAllEvents());
   } catch (error) {
+    console.error(error);
+    
     res.status(404).send(`\n${error.message}\n`)
   }    
 });

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 import { getUserById } from "./database";
+import db from "./database";
 import {
   os,
   GeoLocation,
@@ -58,8 +59,8 @@ export function AdminValidation(req: Request, res: Response, next: NextFunction)
 }
 
 export const getAllEvents = (): Event[] => {
-  const data = fs.readFileSync("./data/database.json");
-  const { events } = JSON.parse(data);
+  //const data = fs.readFileSync("./data/database.json");
+  const events = db.get("events").value();
   return events;
 };
 
