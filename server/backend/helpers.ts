@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 import { getUserById } from "./database";
 import db from "./database";
+import { uniqBy } from "lodash";
 import {
   os,
   GeoLocation,
@@ -61,8 +62,8 @@ export function AdminValidation(req: Request, res: Response, next: NextFunction)
 export const getAllEvents = (): Event[] => {
   //const data = fs.readFileSync("./data/database.json");
   const events = db.get("events").value();
-  const a = events.reduce((some:boolean, e:Event) => typeof e.date === "number", true);
-    console.log(a);
+  // const a = events.reduce((some:boolean, e:Event) => typeof e.date === "number", true);
+  //   console.log(a);
   return events;
 };
 
@@ -72,37 +73,42 @@ export const addNewEvent = (newEvent: Event): void => {
 
 // returns an event array with dates in dd/mm/yy instead of milliseconds
 export const getAllEventsWithNormalDates = (events: Event[]): Event[] => {
-  events.forEach((e: Event) => {
-    if(typeof e.date === "string"){
-      console.log(e.date); 
-    }
-    else{
-      e.date = msToDate(e.date as number);
-    }
-  });
-  const a = events.reduce((some:Boolean, e:Event) => typeof e.date === "number", true);
-  console.log(a);
+  // events.forEach((e: Event) => { 
+   
+  //   e.date = msToDate(e.date as number, events);
+  //   const date: Date = new Date(dateInMili);
+  // return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  // });
+  events = events.map((event: Event) => {
+    const date: Date = new Date(event.date);
+   return {
+     ...event,
+    date: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+  }
+  })
   return events;
 };
 // recieves a date in ms and returns dd/mm/yy
-export const msToDate = (ms: number): string => {
+export const msToDate = (ms: number, events?: Event[]): string => {
   const dateObj = new Date(ms);
-  
+  // const eventsA = [...events!]
+  // const a = eventsA.reduce((some: Boolean, event: Event) => some && !event.date.toString().includes('/'), true)
+  // !a && console.log(a) 
   const dateAndHour: string = dateObj.toLocaleString("en-US", { timeZoneName: "short" }); // FORMAT: MM/DD/YYYY, 10:30:15 AM CST
   const wierdDate: string = dateAndHour.split(",")[0];
   const day = wierdDate.split("/")[1];
   const month = wierdDate.split("/")[0];
   const year = wierdDate.split("/")[2];
+  // const eventsB = [...events!]
+  // const b = eventsB.reduce((some: Boolean, event: Event) => some && !event.date.toString().includes('/'), true)
+  // console.log(b)
   const normalDate = `${day}/${month}/${year}`;
-  if(normalDate === "undefined/Invalid Date/undefined"){
-    console.log('==========================================================');
-    console.log(`MILISECS: ${ms}`);
-    console.log(dateObj);
-  }
+  
   return normalDate;
 }
 // returns an event array with hours in "hh:mm" instead of milliseconds
 export const getAllEventsWithNormalDateTime = (events: Event[]): Event[] => {
+
   events.forEach((e: Event) => {
     const dateObj = new Date(e.date);
     const dateAndHour: string = dateObj.toLocaleString("en-US", { timeZoneName: "short" }); // FORMAT: MM/DD/YYYY, 10:30:15 AM CST
@@ -110,15 +116,14 @@ export const getAllEventsWithNormalDateTime = (events: Event[]): Event[] => {
     const day = wierdDate.split("/")[1];
     const month = wierdDate.split("/")[0];
     const year = wierdDate.split("/")[2];
-    if(dateAndHour.split(",")[1] === undefined){
-      console.log(e);
-    }
-    else{
-      const weirdTime: string = dateAndHour.split(",")[1].slice(1,8);
-      const hour = weirdTime.split(":")[0];
-      e.date = `${day}/${month}/${year},${hour}:00`;
-    }
+    const test = new Date(e.date);
+  
+    const weirdTime: string = dateAndHour.split(",")[1].slice(1,8);
+    const hour = weirdTime.split(":")[0];
+    e.date = `${day}/${month}/${year},${hour}:00`;
+    
   });
+  
   return events;
 };
 
@@ -174,15 +179,11 @@ export const getEventsDitsinctByHour = (events: Event[]): HourAndSessionCount[] 
     }
   }
   events.forEach((e: Event) => {
-    if(typeof e.date === "string"){
-      let hour = e.date.split(',')[1];
-      if(hour.split(':')[0].length === 1){
-        hour = '0' + hour;
-      }
-      for (let i = 0; i < eByHours.length; i++) {
-        if(eByHours[i].hour === hour){
-          eByHours[i].count++;
-        }
+    const dateObj = new Date(e.date);
+    const eventHour = `${dateObj.getHours() >= 10 ? dateObj.getHours() : `0${dateObj.getHours()}`}:00`
+    for (let i = 0; i < eByHours.length; i++) {
+      if(eByHours[i].hour === eventHour){
+        eByHours[i].count++;
       }
     }
   });
@@ -262,16 +263,22 @@ export const filterEvents = (events: Event[], filters: Filter): FilteredEvents =
 export const getAllSessionFromDate = (filterDate: string): Event[] => {
   let events: Event[] = getAllEvents();
   sortByDate(events, '+');
-  events = getAllEventsWithNormalDateTime(events);
-  events = events.filter((e: Event) => {
-    if(typeof e.date === "string"){
-      const currentEventDate = e.date.split(',')[0];
-      return currentEventDate === filterDate;
-    }
-    else{
-      return false;
-    } 
-  });
+  // events = getAllEventsWithNormalDateTime(events);
+  // events = events.filter((e: Event) => {
+  //   if(typeof e.date === "string"){
+  //     const currentEventDate = e.date.split(',')[0];
+  //     return currentEventDate === filterDate;
+  //   }
+  //   else{
+  //     return false;
+  //   } 
+  // });
+  events = events.filter((event: Event) => {
+    const dateObject = new Date(event.date)
+    const dateInString = `${dateObject.getMonth() + 1}/${dateObject.getDate()}/${dateObject.getFullYear()}`
+    return dateInString === filterDate
+  })
+
   return events;
 }
 
@@ -280,6 +287,7 @@ export const getSessionsByDays = (): DayAndSessionCount[] => {
   sortByDate(events, '+');
   events = getAllEventsWithNormalDates(events);
   const sessionByDay: DayAndSessionCount[] = getEventsDitsinctByDay(events);
+  
   return sessionByDay;
 }
 

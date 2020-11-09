@@ -2,7 +2,7 @@ import mockData from "./mock_data";
 import request from "supertest";
 import app from "../app";
 import db from "../database";
-import { Event as event,os } from "../../../client/src/models/event";
+import { Event as event, os } from "../../../client/src/models/event";
 import {OneHour, OneDay, OneWeek} from '../timeFrames'
 
 
@@ -56,15 +56,7 @@ describe("main test", () => {
     expect(sessionsByDays.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(145
       )
     expect(sessionsByDays[0].count).toBe(19);
-    // [
-    //   { date: '10/22/2020', count: 11 },
-    //   { date: '10/23/2020', count: 9 },
-    //   { date: '10/24/2020', count: 8 },
-    //   { date: '10/25/2020', count: 9 },
-    //   { date: '10/26/2020', count: 12 },
-    //   { date: '10/27/2020', count: 15 },
-    //   { date: '10/28/2020', count: 14 }
-    // ]
+    
     const { body: sessionsByDays2 } = await request(app).get("/events/by-days/7").expect(200)
     console.log(sessionsByDays2);
     expect(sessionsByDays2.length).toBe(7)
@@ -74,15 +66,40 @@ describe("main test", () => {
     expect(sessionsByDays2[6].count).toBe(14);
   });
 
-  it.only("can get unique sessions count by hour", async () => {
-    const { body: sessionsByHours } = await request(app).get("/events/by-hours/0").expect(200)
-    expect(sessionsByHours.length).toBe(24)
-    expect(sessionsByHours.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(7)
-
-    const { body: sessionsByHours2 } = await request(app).get("/events/by-hours/2").expect(200)
-
-    expect(sessionsByHours2.length).toBe(24)
-    expect(sessionsByHours2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(25)
+  it("can get unique sessions count by hour", async () => {
+    
+      const { body: sessionsByHours } = await request(app).get("/events/by-hours/0").expect(200)
+      expect(sessionsByHours.length).toBe(24)
+      expect(sessionsByHours.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(7)
+      // [
+      //   { hour: '00:00', count: 0 },
+      //   { hour: '01:00', count: 1 },
+      //   { hour: '02:00', count: 1 },
+      //   { hour: '03:00', count: 1 },
+      //   { hour: '04:00', count: 2 },
+      //   { hour: '05:00', count: 1 },
+      //   { hour: '06:00', count: 1 },
+      //   { hour: '07:00', count: 2 },
+      //   { hour: '08:00', count: 0 },
+      //   { hour: '09:00', count: 0 },
+      //   { hour: '10:00', count: 1 },
+      //   { hour: '11:00', count: 0 },
+      //   { hour: '12:00', count: 2 },
+      //   { hour: '13:00', count: 0 },
+      //   { hour: '14:00', count: 3 },
+      //   { hour: '15:00', count: 3 },
+      //   { hour: '16:00', count: 1 },
+      //   { hour: '17:00', count: 0 },
+      //   { hour: '18:00', count: 2 },
+      //   { hour: '19:00', count: 1 },
+      //   { hour: '20:00', count: 2 },
+      //   { hour: '21:00', count: 1 },
+      //   { hour: '22:00', count: 0 },
+      //   { hour: '23:00', count: 0 }
+      // ]
+      const { body: sessionsByHours2 } = await request(app).get("/events/by-hours/2").expect(200)
+      expect(sessionsByHours2.length).toBe(24)
+      expect(sessionsByHours2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(25)
   });
 
   it("retention cohort", async () => {

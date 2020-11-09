@@ -50,6 +50,7 @@ router.get('/by-days/:offset', (req: Request, res: Response) => {
     const offSet = parseInt(req.params.offset);
     const startIndex:number = sessionsByDay.length - offSet - 7;
     const endIndex:number = sessionsByDay.length - offSet;
+    
     res.json(sessionsByDay.slice(startIndex, endIndex));
     //res.json(sessionsByDay);
   } catch (error) {
@@ -59,13 +60,19 @@ router.get('/by-days/:offset', (req: Request, res: Response) => {
 
 router.get('/by-hours/:offset', (req: Request, res: Response) => {
     try {
-      const sessionsByDay = getSessionsByDays();
-      const offset:number = parseInt(req.params.offset);
-      const filterDate = sessionsByDay[sessionsByDay.length - 1 - offset].date;
-      const sessionsOfDate = getAllSessionFromDate(filterDate);
-      res.json(getEventsDitsinctByHour(sessionsOfDate));
+      const OneHour: number = 1000 * 60 * 60;
+      const OneDay: number = OneHour * 24;
+      const offset = parseInt(req.params.offset)
+      const offsetInMili: number = OneDay * offset;
+      const endOfTodayInMili: number = new Date(new Date().toDateString()).getTime() + OneDay;
+
+      const date: string = new Date(endOfTodayInMili - OneDay - offsetInMili).toLocaleDateString();
+      console.log(date)
+      const sessionsOfDate = getAllSessionFromDate(date);
+      const groupedSessions = getEventsDitsinctByHour(sessionsOfDate)
+      res.json(groupedSessions);
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
     }
 });
 
