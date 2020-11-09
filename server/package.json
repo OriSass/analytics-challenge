@@ -145,11 +145,6 @@
       "no-unused-expressions": 0
     }
   },
-  "husky": {
-    "hooks": {
-      "pre-push": "npm run types"
-    }
-  },
   "browserslist": {
     "production": [
       ">0.2%",
