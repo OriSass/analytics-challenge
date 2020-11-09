@@ -67,7 +67,6 @@ router.get('/by-hours/:offset', (req: Request, res: Response) => {
       const endOfTodayInMili: number = new Date(new Date().toDateString()).getTime() + OneDay;
 
       const date: string = new Date(endOfTodayInMili - OneDay - offsetInMili).toLocaleDateString();
-      console.log(date)
       const sessionsOfDate = getAllSessionFromDate(date);
       const groupedSessions = getEventsDitsinctByHour(sessionsOfDate)
       res.json(groupedSessions);
