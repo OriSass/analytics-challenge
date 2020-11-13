@@ -3,9 +3,10 @@ import { GoogleMap, Marker, LoadScript, MarkerClusterer } from '@react-google-ma
 import { Event, Location } from "../../models/event";
 import { isPropertyAccessChain } from 'typescript';
 import axios from "axios";
+import "./Dashboard.css";
 require('dotenv').config(); 
 const containerStyle = {
-  width: '450px',
+  width: '600px',
   height: '400px'
 };
  
@@ -40,6 +41,7 @@ const GoogleMapEvents: React.FC = () => {
   const MapWithMarkerClusterer = () => {
     if(events){
     return (
+      <div className="dashboard-item">
         <GoogleMap id='marker-example' mapContainerStyle={containerStyle} zoom={3} center={defaultCenter}>
           <MarkerClusterer options={options}>
             {(clusterer) =>
@@ -49,6 +51,7 @@ const GoogleMapEvents: React.FC = () => {
             }
           </MarkerClusterer>
         </GoogleMap>
+      </div>
     )}
   }
   return (

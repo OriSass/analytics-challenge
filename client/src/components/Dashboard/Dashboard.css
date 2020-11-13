@@ -1,0 +1,9 @@
+.dashboard-container{
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+}
+.dashboard-item{
+    width:100%;
+    margin: 30px;
+}

@@ -66,9 +66,11 @@ describe("main test", () => {
     expect(sessionsByDays2[6].count).toBe(14);
   });
 
-  it("can get unique sessions count by hour", async () => {
+  it.only("can get unique sessions count by hour", async () => {
     
       const { body: sessionsByHours } = await request(app).get("/events/by-hours/0").expect(200)
+      console.log(sessionsByHours);
+      
       expect(sessionsByHours.length).toBe(24)
       expect(sessionsByHours.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(7)
       // [

@@ -4,10 +4,9 @@ import {
 } from 'recharts';
 import axios from "axios";
 import { DayAndSessionCount } from '../../models/event';
-
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import "./Dashboard.css";
+import "./Dashboard.css"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -47,7 +46,7 @@ const SessionByDay: React.FC = () => {
  
 
   const fetchSessionData = async(offset:number) => {
-      const {data} = await axios.get(`http://localhost:3001/events/by-days/${offset}`);  
+      const {data} = await axios.get(`http://localhost:3001/events/by-hours/${offset}`);  
       setSessions(data);
   }
   
@@ -55,10 +54,10 @@ const SessionByDay: React.FC = () => {
   const classes = useStyles();
   return ( 
     <div className="dashboard-item">
-        <form noValidate className="dashboard-item">
+        <form className={classes.container} noValidate>
         <TextField
           id="date"
-          label="End Date"
+          label="Date"
           type="date"
           defaultValue="2020-10-30"
           className={classes.textField}
@@ -79,7 +78,7 @@ const SessionByDay: React.FC = () => {
       <LineChart width={730} height={250} data={sessions}
         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
+          <XAxis dataKey="hour" />
           <YAxis dataKey="count" />
           <Tooltip />
           <Legend />

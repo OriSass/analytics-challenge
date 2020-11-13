@@ -3,6 +3,7 @@ import axios from "axios";
 import { weeklyRetentionObject } from '../../models/event';
 import { withStyles, Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper} from '@material-ui/core';
+import "./Dashboard.css";
 
 const DashBoard: React.FC = () => {
 
@@ -51,7 +52,7 @@ const useStyles = makeStyles({
 
 const renderRetention = () => {
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} className="dashboard-item">
       <Table aria-label="customized table">
         <TableHead>
           <TableRow>
